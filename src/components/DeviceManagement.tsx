@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Smartphone, Laptop, Trash2, Shield, Calendar } from 'lucide-react';
+import { Smartphone, Laptop, Trash2, Shield, Calendar, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 import { api } from '../services/api';
 
 export function DeviceManagement() {
   const [devices, setDevices] = useState<any[]>([]);
+  const [showAddDevice, setShowAddDevice] = useState(false);
 
   useEffect(() => {
     loadDevices();
@@ -36,6 +45,10 @@ export function DeviceManagement() {
               <CardTitle>Trusted Devices</CardTitle>
               <CardDescription>Devices authorized via WebAuthn</CardDescription>
             </div>
+            <Button onClick={() => setShowAddDevice(true)} className="bg-amber-500 hover:bg-amber-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Device
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -67,6 +80,38 @@ export function DeviceManagement() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showAddDevice} onOpenChange={setShowAddDevice}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Device</DialogTitle>
+            <DialogDescription>
+              To add a new device, complete the device binding setup from that device.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6 space-y-4">
+            <div className="p-4 bg-slate-50 rounded-lg space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center flex-shrink-0">1</div>
+                <div>
+                  <h4 className="mb-1">Access from New Device</h4>
+                  <p className="text-sm text-slate-600">Open LockIn on the device you want to add</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center flex-shrink-0">2</div>
+                <div>
+                  <h4 className="mb-1">Login & Verify</h4>
+                  <p className="text-sm text-slate-600">Complete login and biometric verification</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddDevice(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

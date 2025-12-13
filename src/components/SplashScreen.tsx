@@ -27,7 +27,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             </div>
           </div>
         </div>
-        <h1 className="text-white mb-2">SecureAttend</h1>
+        <h1 className="text-white mb-2 text-2xl font-bold">LockIn</h1>
         <p className="text-slate-300">Enterprise Attendance & Access Control</p>
         <div className="mt-8 flex items-center justify-center gap-2 text-slate-400">
           <Lock className="w-4 h-4" />

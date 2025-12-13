@@ -60,7 +60,7 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-xl mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">SecureAttend</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">LockIn</h1>
           <p className="text-slate-600">Enterprise Attendance & Access Control</p>
         </div>
 
@@ -77,7 +77,6 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
             </Alert>
           )}
 
-          {/* FIX: Increased spacing from space-y-5 to space-y-6 for breathing room */}
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-700 font-medium mb-1 block">Email Address</Label>

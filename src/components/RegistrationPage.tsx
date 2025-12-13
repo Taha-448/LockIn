@@ -79,7 +79,7 @@ export function RegistrationPage({ onComplete, onBack }: RegistrationPageProps) 
           <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-xl mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">SecureAttend</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">LockIn</h1>
           <p className="text-slate-600">Create Your Account</p>
         </div>
 
@@ -97,7 +97,6 @@ export function RegistrationPage({ onComplete, onBack }: RegistrationPageProps) 
             )}
 
             <form onSubmit={handleSubmitDetails} className="space-y-6">
-              {/* FIX: Increased grid gap to gap-6 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 space-y-2">
                   <Label className="font-medium text-slate-700 mb-1 block">Full Name *</Label>
