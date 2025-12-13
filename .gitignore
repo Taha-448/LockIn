@@ -1,0 +1,21 @@
+# --- System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Frontend (Node) ---
+node_modules/
+dist/
+build/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Backend (Python) ---
+secure-backend/venv/
+secure-backend/__pycache__/
+*.pyc
+
+# --- SECURITY SECRETS (NEVER UPLOAD THESE) ---
+secure-backend/.env
+.env

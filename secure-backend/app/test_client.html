@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3FA Test Client</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        button { padding: 10px 20px; cursor: pointer; margin: 5px; }
+        .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Secure Attendance 3FA Debugger</h1>
+
+    <div class="box">
+        <h3>Step 1: Register Device (Binding)</h3>
+        <p>Make sure you created user "testuser" in Swagger docs first!</p>
+        <button onclick="registerDevice()">Bind Device / Scan Fingerprint</button>
+        <div id="reg-status"></div>
+    </div>
+
+    <div class="box">
+        <h3>Step 2: Login (3FA)</h3>
+        <input type="password" id="login-pass" placeholder="Enter Password (mypassword123)">
+        <button onclick="loginUser()">Login with Password + Fingerprint</button>
+        <div id="login-status"></div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+        const USERNAME = "testuser";
+
+        // Helper: Convert Base64URL to Uint8Array (Browser needs this)
+        function bufferDecode(value) {
+            return Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+        }
+
+        // Helper: Convert ArrayBuffer to Base64URL (Server needs this)
+        function bufferEncode(value) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(value)))
+                .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+        }
+
+        async function registerDevice() {
+            const status = document.getElementById("reg-status");
+            status.innerText = "Requesting options...";
+            
+            try {
+                // 1. Get Options from Backend
+                const resp = await fetch(`${API_URL}/webauthn/register/options`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: USERNAME })
+                });
+                const options = await resp.json();
+
+                // 2. Decode the challenge for the browser
+                options.challenge = bufferDecode(options.challenge);
+                options.user.id = bufferDecode(options.user.id);
+
+                // 3. Trigger Browser Popup (The Magic Part)
+                status.innerText = "Please scan fingerprint or QR code...";
+                const credential = await navigator.credentials.create({ publicKey: options });
+
+                // 4. Encode result to send back to server
+                const credentialJSON = {
+                    id: credential.id,
+                    rawId: bufferEncode(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        attestationObject: bufferEncode(credential.response.attestationObject),
+                        clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+                    }
+                };
+
+                // 5. Send to Backend
+                const verifyResp = await fetch(`${API_URL}/webauthn/register/complete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        username: USERNAME, 
+                        credential_json: credentialJSON 
+                    })
+                });
+
+                const result = await verifyResp.json();
+                if(verifyResp.ok) {
+                    status.innerText = "SUCCESS: " + JSON.stringify(result);
+                    status.style.color = "green";
+                } else {
+                    status.innerText = "ERROR: " + JSON.stringify(result);
+                    status.style.color = "red";
+                }
+
+            } catch (err) {
+                status.innerText = "FAILED: " + err.message;
+                status.style.color = "red";
+                console.error(err);
+            }
+        }
+
+        async function loginUser() {
+            const status = document.getElementById("login-status");
+            const password = document.getElementById("login-pass").value;
+            status.innerText = "Requesting login options...";
+
+            try {
+                // 1. Get Options
+                const resp = await fetch(`${API_URL}/webauthn/login/options`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: USERNAME })
+                });
+                
+                if(!resp.ok) throw new Error(await resp.text());
+                const options = await resp.json();
+
+                // 2. Decode Challenge
+                options.challenge = bufferDecode(options.challenge);
+                options.allowCredentials.forEach(cred => {
+                    cred.id = bufferDecode(cred.id);
+                });
+
+                // 3. Trigger Popup
+                status.innerText = "Verifying Biometrics...";
+                const assertion = await navigator.credentials.get({ publicKey: options });
+
+                // 4. Encode Result
+                const credentialJSON = {
+                    id: assertion.id,
+                    rawId: bufferEncode(assertion.rawId),
+                    type: assertion.type,
+                    response: {
+                        authenticatorData: bufferEncode(assertion.response.authenticatorData),
+                        clientDataJSON: bufferEncode(assertion.response.clientDataJSON),
+                        signature: bufferEncode(assertion.response.signature),
+                        userHandle: assertion.response.userHandle ? bufferEncode(assertion.response.userHandle) : null
+                    }
+                };
+
+                // 5. Send Password + Bio to Backend
+                const verifyResp = await fetch(`${API_URL}/webauthn/login/complete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        username: USERNAME, 
+                        password: password,
+                        credential_json: credentialJSON 
+                    })
+                });
+
+                const result = await verifyResp.json();
+                if(verifyResp.ok) {
+                    status.innerText = "LOGIN SUCCESS: " + JSON.stringify(result);
+                    status.style.color = "green";
+                } else {
+                    status.innerText = "LOGIN FAILED: " + JSON.stringify(result);
+                    status.style.color = "red";
+                }
+
+            } catch (err) {
+                status.innerText = "ERROR: " + err.message;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
