@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-**LockIN** is an enterprise-grade web application designed to eliminate "buddy punching" (attendance fraud) and prevent unauthorized access to sensitive employee data. 
+**LockIn** is an enterprise-grade web application designed to eliminate "buddy punching" (attendance fraud) and prevent unauthorized access to sensitive employee data. 
 
 Unlike traditional systems that rely solely on passwords, this project implements a **True 3-Factor Authentication (3FA)** architecture combined with strict **Network Geofencing** and **AES-256 Encryption at Rest**. It assumes the network is hostile and the database could be compromised, protecting data integrity and confidentiality under all scenarios.
 
