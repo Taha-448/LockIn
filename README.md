@@ -1,4 +1,4 @@
-# SecureAttend: Zero-Trust Attendance System
+# LockIn: Zero-Trust Attendance System
 
 > **Course:** Information Security
 > **Architecture:** Full Stack (React + Python FastAPI + MySQL)
